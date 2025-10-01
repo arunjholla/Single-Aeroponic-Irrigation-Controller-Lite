@@ -11,6 +11,7 @@ unsigned long timers[3] = {0, 0, 0}; // End times for current state
 bool ready[3] = {true, true, true}; // Ready to irrigate
 bool irrigating[3] = {false, false, false}; // Irrigation state
 const int transDelay = 2000; // Transition delay (ms)
+int lastTank = -1; // Track last displayed tank (-1 = Idle)
 
 void setup() {
   wdt_enable(WDTO_8S); // 8s watchdog
@@ -27,6 +28,20 @@ void setup() {
   EEPROM.get(12, offDurs);
   
   lcd.setCursor(0, 0); lcd.print("R&D Controller");
+  lcd.setCursor(0, 1); lcd.print("Idle            ");
+}
+
+void updateLCD(int tank) {
+  if (tank != lastTank) { // Update only on state change
+    lcd.setCursor(0, 1); lcd.print("                "); // Clear line
+    lcd.setCursor(0, 1);
+    if (tank == -1) {
+      lcd.print("Idle");
+    } else {
+      lcd.print("C"); lcd.print(7 + tank); lcd.print(" Irrigating");
+    }
+    lastTank = tank;
+  }
 }
 
 void loop() {
@@ -60,15 +75,15 @@ void loop() {
         irrigating[i] = true;
         timers[i] = now + onDurs[i] + transDelay; // Include delay
         ready[i] = false;
-        lcd.setCursor(0, 1); lcd.print("C"); lcd.print(7+i); lcd.print(" Irrigating ");
+        updateLCD(i); // Show C7/C8/C9 Irrigating
         break;
       }
     }
   }
 
-  // Update LCD
-  if(!anyOn) {
-    lcd.setCursor(0, 1); lcd.print("Idle            ");
+  // Update LCD to Idle if no tanks irrigating
+  if(!anyOn && lastTank != -1) {
+    updateLCD(-1);
   }
   delay(100); // Throttle loop
 }
