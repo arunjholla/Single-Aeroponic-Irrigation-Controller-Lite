@@ -1,54 +1,58 @@
 Irrigation Controller Project
-This Arduino-based irrigation controller manages three tanks (C7, C8, C9) with solenoid valves in Bangalore, India. It controls irrigation cycles with specific on (irrigation) and off (idle) durations, displays status on an LCD, and uses a bypass solenoid for system control. Three variants are implemented with different irrigation-to-idle ratios for testing and optimization.
+This Arduino-based irrigation controller manages three tanks (C7, C8, C9) with dual-section solenoids per tank in Bangalore, India. It controls irrigation cycles, splits on-time between sections with 2s overlap, displays status on an LCD, and uses a bypass solenoid. Three versions are implemented with different irrigation-to-idle ratios.
 Hardware Requirements
 
 Arduino board (e.g., Uno)
 LiquidCrystal_I2C LCD (16x2, address 0x27)
-Solenoids: C7, C8, C9 (normally open, LOW=open), C6 bypass (normally closed, LOW=closed)
-Pins: C7 (8), C8 (9), C9 (10), Bypass (11)
+Solenoids: C7 sections (pins 8,7), C8 (9,6), C9 (10,5) (NO, LOW=open); C6 bypass (11, NC, LOW=closed)
 Relay module for solenoid control
 
 Features
 
-Manages irrigation cycles for three tanks with configurable on/off durations
-Displays status (Idle, C7, C8, or C9 irrigation) on a 16x2 LCD
-2-second transition delay between cycles
+Manages irrigation for three tanks with configurable on/off durations
+Splits tank irrigation: Section 1 (half on-time), 2s overlap (both open), Section 2 (half on-time)
+Displays status (Idle, C7, C8, or C9 irrigation) on LCD
+2s transition delay between cycles
 10ms relay stabilization delay
-Serial Monitor debugging for state transitions
+Serial Monitor debugging for state transitions (e.g., sections, overlaps, bypass)
 
-Variants
-The project includes three variants with different irrigation-to-idle ratios for tanks C7, C8, and C9.
-Variant 1: Ratio 1:15
+Versions
 
-C7: 60s on, 900s off (1:15 ratio)
-C8: 30s on, 450s off (1:15 ratio)
-C9: 120s on, 1800s off (1:15 ratio)
-File: original.ino
+Version 1: Ratio 1:15
 
-Variant 2: Ratio 1:3
+C7: 60s on (30s/sec + overlap), 900s off
+C8: 30s on (15s/sec + overlap), 450s off
+C9: 120s on (60s/sec + overlap), 1800s off
+File: Single_Aeroponic_Controller_Lite_Variant_1.ino
 
-C7: 30s on, 90s off (1:3 ratio)
-C8: 60s on, 180s off (1:3 ratio)
-C9: 120s on, 360s off (1:3 ratio)
-File: variant1.ino
 
-Variant 3: Ratio 1:7
+Version 2: Ratio 1:3
 
-C7: 30s on, 210s off (1:7 ratio)
-C8: 60s on, 420s off (1:7 ratio)
-C9: 120s on, 840s off (1:7 ratio)
-File: variant2.ino
+C7: 30s on (15s/sec + overlap), 90s off
+C8: 60s on (30s/sec + overlap), 180s off
+C9: 120s on (60s/sec + overlap), 360s off
+File: Single_Aeroponic_Controller_Lite_Variant_2.ino
+
+
+Version 3: Ratio 1:7
+
+C7: 30s on (15s/sec + overlap), 210s off
+C8: 60s on (30s/sec + overlap), 420s off
+C9: 120s on (60s/sec + overlap), 840s off
+File: Single_Aeroponic_Controller_Lite_Variant_3.ino
+
+
 
 Notes
 
-EEPROM and watchdog timer were removed from Variants 2 and 3 to address system hang issues during bypass solenoid actuation.
-Serial Monitor (9600 baud) is enabled in Variants 2 and 3 for debugging state changes (e.g., tank irrigation, bypass status).
-SD card logging is planned for future implementation to replace EEPROM functionality.
-All timings are in milliseconds.
+EEPROM and watchdog timer removed to prevent hangs during solenoid actuation
+Serial Monitor (9600 baud) enabled for debugging
+SD card logging planned for future
+All timings in milliseconds; total irrigation phase: onDur + 2000ms (overlap)
 
 Setup
 
-Connect the LCD and solenoids to the specified pins.
-Upload the desired variant's .ino file to the Arduino.
-Open Serial Monitor (9600 baud) for debugging (Variants 2 and 3).
-Monitor the LCD for real-time status updates.
+Connect LCD and solenoids to specified pins.
+Upload desired version's .ino file to Arduino.
+Open Serial Monitor for debugging.
+Monitor LCD for status.
